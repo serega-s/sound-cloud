@@ -42,12 +42,12 @@ class Follower(models.Model):
         return f'{self.subscriber} subscribed {self.user}'
 
 
-# class SocialLink(models.Model):
-#     """Model of user social networks
-#     """
+class SocialLink(models.Model):
+    """Model of user social networks
+    """
 
-#     user = models.ForeignKey(AuthUser, on_delete=models.CASCADE, related_name='social_links')
-#     link = models.URLField(max_length=100)
+    user = models.ForeignKey(AuthUser, on_delete=models.CASCADE, related_name='social_links')
+    link = models.URLField(max_length=100)
 
-#     def __str__(self):
-#         return f'{self.user}'
+    def __str__(self):
+        return f'{self.user}'

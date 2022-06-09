@@ -9,6 +9,6 @@ class AuthUserAdmin(admin.ModelAdmin):
     list_display_links = ['email']
 
 
-# @admin.register(models.SocialLink)
-# class SocialLinkAdmin(admin.ModelAdmin):
-#     list_display = ['user', 'link']
+@admin.register(models.SocialLink)
+class SocialLinkAdmin(admin.ModelAdmin):
+    list_display = ['user', 'link']
