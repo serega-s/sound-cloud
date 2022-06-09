@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta
+    http-equiv="X-UA-Compatible"
+    content="IE=edge"
+  >
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <meta
+    name="google-signin-client_id"
+    content="796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com"
+  >
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="my-signin"></div>
+
+  <script>
+
+    function onSuccess(googleUser) {
+      const profile = googleUser.getBasicProfile()
+      console.log('Email: ', profile.getEmail())
+
+      const token = googleUser.getAuthResponse().id_token
+      console.log('Token', token)
+    }
+
+    function onFailure(error) {
+      console.log(error)
+    }
+
+    function renderButton() {
+      gapi.signin2.render('my-signin', {
+        scope: 'profile email',
+        width: 240,
+        height: 50,
+        longtitle: true,
+        theme: 'dark',
+        onsuccess: onSuccess,
+        onfailure: onFailure
+      })
+    }
+
+  </script>
+
+  <script
+    src="https://apis.google.com/js/platform.js?onload=renderButton"
+    async
+    defer
+  ></script>
+</body>
+
+</html>
