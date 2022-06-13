@@ -28,7 +28,7 @@ You must have Python installed, to check it
 python --version
 ```
 
-### Installing dependencies
+### Installing
 
 A step by step series of examples that tell you how to get a development env running.
 
@@ -36,6 +36,24 @@ Installing dependencies with pip
 
 ```
 python -m pip -r install requirements.txt
+```
+
+Making model migrations
+
+```
+python ./manage.py makemigrations
+```
+
+Migrating into database
+
+```
+python ./manage.py migrate
+```
+
+Creating a superuser
+
+```
+python ./manage.py createsuperuser
 ```
 
 Running app
