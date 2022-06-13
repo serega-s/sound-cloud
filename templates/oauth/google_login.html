@@ -2,58 +2,292 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta
     http-equiv="X-UA-Compatible"
     content="IE=edge"
-  >
+  />
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
-  >
-  <meta
-    name="google-signin-client_id"
-    content="796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com"
-  >
-  <title>Document</title>
+  />
+  <title>Google Signin</title>
 </head>
 
 <body>
-  <div id="my-signin"></div>
+  <!-- <div
+    id="g_id_onload"
+    data-client_id="796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com"
+    data-callback="handleCredentialResponse"
+  >
+  </div>
+  <div
+    class="g_id_signin"
+    data-type="standard"
+  ></div> -->
 
+  <button onclick="handleResponse()">Click</button>
   <script>
+    let client
+    let access_token
 
-    function onSuccess(googleUser) {
-      const profile = googleUser.getBasicProfile()
-      console.log('Email: ', profile.getEmail())
-
-      const token = googleUser.getAuthResponse().id_token
-      console.log('Token', token)
-    }
-
-    function onFailure(error) {
-      console.log(error)
-    }
-
-    function renderButton() {
-      gapi.signin2.render('my-signin', {
+    function initClient() {
+      client = google.accounts.oauth2.initTokenClient({
+        client_id: '796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com',
         scope: 'profile email',
-        width: 240,
-        height: 50,
-        longtitle: true,
-        theme: 'dark',
-        onsuccess: onSuccess,
-        onfailure: onFailure
+        callback: (tokenResponse) => {
+          access_token = tokenResponse.access_token
+          email = tokenResponse.email
+        },
       })
     }
+    function getToken() {
+      return client.requestAccessToken()
+    }
+    function getEmail() {
+      return console.log(google.accounts.oauth2)
+    }
+    function revokeToken() {
+      google.accounts.oauth2.revoke(access_token, () => { console.log('access token revoked') })
+    }
+    function handleResponse() {
+      // var xhr = new XMLHttpRequest()
+      // xhr.open('GET', 'https://www.googleapis.com/calendar/v3/calendars/primary/events')
+      // xhr.setRequestHeader('Authorization', 'Bearer ' + access_token)
+      // xhr.send()
+      fetch("http://locahost:8000/api/v1/auth/google/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json;charset=UTF-8" },
+        body: JSON.stringify({
+          email: getEmail(),
+          token: getToken(),
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => console.log("ID", data.user_id + '\nTOKEN: ' + data.access_token))
+    }
 
+    // const gapiLoadPromise = new Promise((resolve, reject) => {
+    //   gapiLoadOkay = resolve
+    //   gapiLoadFail = reject
+    // })
+    // const gisLoadPromise = new Promise((resolve, reject) => {
+    //   gisLoadOkay = resolve
+    //   gisLoadFail = reject
+    // })
+
+    // const client = google.accounts.oauth2.initTokenClient({
+    //   client_id: '796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com',
+    //   scope: 'https://www.googleapis.com/auth/calendar.readonly',
+    //   callback: (response) => {
+    //   },
+    // })
+    function handleCredentialResponse(credential, select_by) {
+      console.log('CREDENTIAL', credential)
+
+    }
+    // window.onload = () => {
+    //   google.accounts.id.initialize({
+    //     client_id: '796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com',
+    //     callback: handleCredentialResponse
+    //   })
+    //   google.accounts.id.renderButton(
+    //     {
+    //       type: "standard button",
+    //       width: 100,
+    //       text: "signin",
+    //       size: "medium",
+    //       theme: "filled_black",
+    //       shape: "pill"
+    //     }
+    //   )
+    //   google.accounts.id.prompt()
+    // }
+
+
+
+
+
+
+    // function onSuccess(googleUser) {
+    //   const profile = googleUser.getBasicProfile()
+    //   console.log("Email: ", profile.getEmail())
+
+    //   const token = googleUser.getAuthResponse().id_token
+    //   console.log("Token", token)
+
+    //   fetch("", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json;charset=UTF-8" },
+    //     body: JSON.stringify({
+    //       email: profile.getEmail(),
+    //       token: token,
+    //     }),
+    //   })
+    //     .then((res) => res.json())
+    //     .then((data) => console.log("ID", data.user_id + '\nTOKEN: ' + data.access_token))
+    // }
+
+    // function renderButton() {
+
+    //   google.accounts.id.renderButton(
+    //     {
+    //       type: "standard button",
+    //       width: 100,
+    //       text: "signin",
+    //       size: "medium",
+    //       theme: "filled_black",
+    //       shape: "pill"
+    //     }
+    //   )
+    // }
   </script>
-
   <script
-    src="https://apis.google.com/js/platform.js?onload=renderButton"
+    onload="initClient()"
     async
+    src="https://accounts.google.com/gsi/client"
     defer
   ></script>
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Google Docs API Quickstart</title>
+  <meta charset="utf-8" />
+</head>
+
+<body>
+  <p>Google Docs API Quickstart</p>
+
+  <button
+    id="authorize_button"
+    onclick="handleAuthClick()"
+  >Authorize</button>
+  <button
+    id="signout_button"
+    onclick="handleSignoutClick()"
+  >Sign Out</button>
+
+  <pre
+    id="content"
+    style="white-space: pre-wrap;"
+  ></pre>
+
+  <script type="text/javascript">
+    const CLIENT_ID = '796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com'
+    const API_KEY = 'AIzaSyDgQwQa8EpM4u5jg9SpkzdDXlLa_Ylh57Q'
+    const DISCOVERY_DOC = 'https://docs.googleapis.com/$discovery/rest?version=v1'
+    const SCOPES = 'https://www.googleapis.com/auth/userinfo.email'
+
+    let tokenClient
+    let gapiInited = false
+    let gisInited = false
+
+    document.getElementById('authorize_button').style.visibility = 'hidden'
+    document.getElementById('signout_button').style.visibility = 'hidden'
+
+    function gapiLoaded() {
+      gapi.load('client', intializeGapiClient)
+    }
+
+    async function intializeGapiClient() {
+      await gapi.client.init({
+        apiKey: API_KEY,
+        // discoveryDocs: [DISCOVERY_DOC],
+      })
+      gapiInited = true
+      maybeEnableButtons()
+    }
+
+    function gisLoaded() {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '', // defined later
+      })
+      gisInited = true
+      maybeEnableButtons()
+    }
+
+    function maybeEnableButtons() {
+      if (gapiInited && gisInited) {
+        document.getElementById('authorize_button').style.visibility = 'visible'
+      }
+    }
+
+    function handleAuthClick() {
+      tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+          throw (resp)
+        }
+        document.getElementById('signout_button').style.visibility = 'visible'
+        document.getElementById('authorize_button').innerText = 'Refresh'
+        // await printDocTitle()
+      }
+
+      if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({ prompt: 'consent' })
+      } else {
+        tokenClient.requestAccessToken({ prompt: '' })
+      }
+    }
+
+    function handleSignoutClick() {
+      const token = gapi.client.getToken()
+      if (token !== null) {
+        google.accounts.oauth2.revoke(token.access_token)
+        gapi.client.setToken('')
+        document.getElementById('content').innerText = ''
+        document.getElementById('authorize_button').innerText = 'Authorize'
+        document.getElementById('signout_button').style.visibility = 'hidden'
+      }
+    }
+
+    async function printDocTitle() {
+      try {
+        const response = await gapi.client.docs.documents.get({
+          documentId: '195j9eDD3ccgjQRttHhJPymLJUCOUjs-jmwTrekvdjFE',
+        })
+        const doc = response.result
+        const output = `Document ${doc.title} successfully found.\n`
+        document.getElementById('content').innerText = output
+      } catch (err) {
+        document.getElementById('content').innerText = err.message
+        return
+      }
+    }
+  </script>
+  <script
+    async
+    defer
+    src="https://apis.google.com/js/api.js"
+    onload="gapiLoaded()"
+  ></script>
+  <script
+    async
+    defer
+    src="https://accounts.google.com/gsi/client"
+    onload="gisLoaded()"
+  ></script>
+</body>
+
+</html> -->
