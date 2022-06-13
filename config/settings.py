@@ -15,7 +15,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -27,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'drf_spectacular',
     'src.oauth'
 
 ]
@@ -118,3 +118,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+ALGORITHM = 'HS256'
+ACCESS_TOKEN_EXPIRE_MINUTE = 60 * 24
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+]
+
+
+GOOGLE_CLIENT_ID = '796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com'
