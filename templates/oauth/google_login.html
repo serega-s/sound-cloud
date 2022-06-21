@@ -11,10 +11,15 @@
     name="viewport"
     content="width=device-width, initial-scale=1.0"
   />
+  <meta
+    name="google-signin-client_id"
+    content="796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com"
+  />
   <title>Google Signin</title>
 </head>
 
 <body>
+  <div id="my-signin"></div>
   <!-- <div
     id="g_id_onload"
     data-client_id="796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com"
@@ -26,126 +31,87 @@
     data-type="standard"
   ></div> -->
 
-  <button onclick="handleResponse()">Click</button>
+  <!-- <button onclick="handleCredentialResponse()">Click</button> -->
   <script>
     let client
     let access_token
+    // let email
+
+    function handleCredentialResponse(response) {
+
+      console.log('Encoded JWT ID Token', response)
+
+      fetch("/api/v1/auth/google/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json;charset=UTF-8" },
+        body: JSON.stringify({
+          email: 'mr1205sss@gmail.com',
+          token: getToken(),
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => console.log("ID", data.user_id + '\nTOKEN: ' + data.access_token))
+
+    }
 
     function initClient() {
       client = google.accounts.oauth2.initTokenClient({
         client_id: '796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com',
         scope: 'profile email',
-        callback: (tokenResponse) => {
-          access_token = tokenResponse.access_token
-          email = tokenResponse.email
-        },
+        callback: handleCredentialResponse
       })
+      access_token = client.requestAccessToken()
+      console.log(access_token)
+
     }
     function getToken() {
       return client.requestAccessToken()
     }
-    function getEmail() {
-      return console.log(google.accounts.oauth2)
-    }
     function revokeToken() {
       google.accounts.oauth2.revoke(access_token, () => { console.log('access token revoked') })
     }
-    function handleResponse() {
-      // var xhr = new XMLHttpRequest()
-      // xhr.open('GET', 'https://www.googleapis.com/calendar/v3/calendars/primary/events')
-      // xhr.setRequestHeader('Authorization', 'Bearer ' + access_token)
-      // xhr.send()
-      fetch("http://locahost:8000/api/v1/auth/google/", {
+
+    function onFailure(err) {
+      console.log(err)
+    }
+
+    function onSuccess(googleUser) {
+      const profile = googleUser.getBasicProfile()
+      console.log("Email: ", profile.getEmail())
+
+      const token = googleUser.getAuthResponse().id_token
+      console.log("Token", token)
+
+      fetch("/api/v1/auth/google/", {
         method: "POST",
         headers: { "Content-Type": "application/json;charset=UTF-8" },
         body: JSON.stringify({
-          email: getEmail(),
-          token: getToken(),
+          email: profile.getEmail(),
+          token: token,
         }),
       })
         .then((res) => res.json())
         .then((data) => console.log("ID", data.user_id + '\nTOKEN: ' + data.access_token))
     }
 
-    // const gapiLoadPromise = new Promise((resolve, reject) => {
-    //   gapiLoadOkay = resolve
-    //   gapiLoadFail = reject
-    // })
-    // const gisLoadPromise = new Promise((resolve, reject) => {
-    //   gisLoadOkay = resolve
-    //   gisLoadFail = reject
-    // })
+    function renderButton() {
 
-    // const client = google.accounts.oauth2.initTokenClient({
-    //   client_id: '796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com',
-    //   scope: 'https://www.googleapis.com/auth/calendar.readonly',
-    //   callback: (response) => {
-    //   },
-    // })
-    function handleCredentialResponse(credential, select_by) {
-      console.log('CREDENTIAL', credential)
-
+      gapi.signin2.render('my-signin',
+        {
+          scope: 'profile email',
+          theme: 'dark',
+          longtitle: true,
+          width: 100,
+          height: 50,
+          onsuccess: onSuccess,
+          onfailure: onFailure
+        }
+      )
     }
-    // window.onload = () => {
-    //   google.accounts.id.initialize({
-    //     client_id: '796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com',
-    //     callback: handleCredentialResponse
-    //   })
-    //   google.accounts.id.renderButton(
-    //     {
-    //       type: "standard button",
-    //       width: 100,
-    //       text: "signin",
-    //       size: "medium",
-    //       theme: "filled_black",
-    //       shape: "pill"
-    //     }
-    //   )
-    //   google.accounts.id.prompt()
-    // }
-
-
-
-
-
-
-    // function onSuccess(googleUser) {
-    //   const profile = googleUser.getBasicProfile()
-    //   console.log("Email: ", profile.getEmail())
-
-    //   const token = googleUser.getAuthResponse().id_token
-    //   console.log("Token", token)
-
-    //   fetch("", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json;charset=UTF-8" },
-    //     body: JSON.stringify({
-    //       email: profile.getEmail(),
-    //       token: token,
-    //     }),
-    //   })
-    //     .then((res) => res.json())
-    //     .then((data) => console.log("ID", data.user_id + '\nTOKEN: ' + data.access_token))
-    // }
-
-    // function renderButton() {
-
-    //   google.accounts.id.renderButton(
-    //     {
-    //       type: "standard button",
-    //       width: 100,
-    //       text: "signin",
-    //       size: "medium",
-    //       theme: "filled_black",
-    //       shape: "pill"
-    //     }
-    //   )
-    // }
   </script>
   <script
-    onload="initClient()"
     async
-    src="https://accounts.google.com/gsi/client"
+    src="https://apis.google.com/js/platform.js?onload=renderButton"
     defer
   ></script>
 </body>
