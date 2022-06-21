@@ -1,11 +1,11 @@
 from django.core.validators import FileExtensionValidator
 from django.db import models
 
-from src.base.service import get_path_upload_avatar, validate_size_image
+from ..base.services import get_path_upload_avatar, validate_size_image
 
 
 class AuthUser(models.Model):
-    """User model for platform
+    """Django ORM Model of users
     """
     email = models.EmailField(max_length=150, unique=True)
     join_date = models.DateTimeField(auto_now_add=True)
@@ -17,7 +17,7 @@ class AuthUser(models.Model):
         upload_to=get_path_upload_avatar,
         blank=True,
         null=True,
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg']), validate_size_image]
+        validators=[FileExtensionValidator(allowed_extensions=['jpg']), validate_size_image]
     )
 
     """Always return True, lets us know if user is authenticated
@@ -43,7 +43,7 @@ class Follower(models.Model):
 
 
 class SocialLink(models.Model):
-    """Model of user social networks
+    """Django ORM Model of user social links
     """
 
     user = models.ForeignKey(AuthUser, on_delete=models.CASCADE, related_name='social_links')
