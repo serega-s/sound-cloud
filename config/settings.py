@@ -26,8 +26,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    'drf_spectacular',
-    'src.oauth'
+    'drf_yasg',
+
+    'src.oauth',
+    'src.audio_library'
 
 ]
 
@@ -129,3 +131,21 @@ CORS_ALLOWED_ORIGINS = [
 
 
 GOOGLE_CLIENT_ID = '796604246384-r4av9ajq38acc7qdb4vvtoab80iv8vea.apps.googleusercontent.com'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('src.oauth.services.auth_backend.AuthBackend',),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ]
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    }
+}
