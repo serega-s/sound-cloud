@@ -1,26 +1,31 @@
 from django.urls import include, path
 from django.views.generic import TemplateView
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
 from rest_framework import permissions
-from rest_framework.schemas import get_schema_view
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Audio Library",
+        default_version="v1",
+        description="Audio Library backend built with DRF",
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny]
+)
 
 urlpatterns = [
+    path('auth/', include('src.oauth.urls')),
+    path('audio/', include('src.audio_library.urls')),
+
     path(
-        'openapi/',
-        get_schema_view(
-            title="Audio Library",
-            description="Audio Library backend built with DRF",
-            version="1.0.0",
-            permission_classes=[permissions.AllowAny],
-        ),
-        name='openapi-schema'
+        'redoc/',
+        schema_view.with_ui('redoc', cache_timeout=0),
+        name='schema-redoc'
     ),
     path(
         'docs/',
-        TemplateView.as_view(
-            template_name='swagger/swagger-ui.html',
-            extra_context={'schema_url': 'openapi-schema'}
-        ),
-        name='swagger-ui'
+        schema_view.with_ui('swagger', cache_timeout=0),
+        name='schema-swagger-ui'
     ),
-    path('auth/', include('src.oauth.urls'))
 ]
