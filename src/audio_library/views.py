@@ -146,7 +146,7 @@ class DownloadTrackView(views.APIView):
         self.track = get_object_or_404(models.Track, id=pk)
 
         if os.path.exists(self.track.file.path):
-            self.set_download(self.track)
+            self.set_download()
 
             return FileResponse(open(self.track.file.path), 'rb', filename=self.track.file.name, as_attachment=True)
         else:
