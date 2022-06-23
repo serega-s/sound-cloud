@@ -68,6 +68,25 @@ urlpatterns = [
     ),
 
     path(
+        'comments/',
+        views.CommentAuthorView.as_view({'get': 'list', 'post': 'create'})
+    ),
+    path(
+        'comments/<int:pk>/',
+        views.CommentAuthorView.as_view({'put': 'update', 'delete': 'destroy'})
+    ),
+
+    path(
+        'comments-by-track/<int:pk>/',
+        views.CommentView.as_view({'get': 'list'})
+    ),
+
+    path(
+        'stream-author-track/<int:pk>/',
+        views.StreamingFileAuthorView.as_view()
+    ),
+
+    path(
         'playlist/',
         views.PlayListView.as_view(
             {'get': 'list', 'post': 'create'}
