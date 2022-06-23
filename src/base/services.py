@@ -19,6 +19,11 @@ def get_path_upload_track(instance, file):
     """
     return f'track/user_{instance.user.id}/{file}'
 
+def get_path_upload_cover_track(instance, file):
+    """File path building, format: (media)/track/user_id/photo.jpeg
+    """
+    return f'track/cover/user_{instance.user.id}/{file}'
+
 
 def get_path_upload_cover_playlist(instance, file):
     """File path building, format: (media)/playlist/user_id/photo.jpeg
@@ -30,7 +35,7 @@ def delete_old_file(path_file):
     """Deleting an old file
     """
     if os.path.exists(path_file):
-        os.remove()
+        os.remove(path_file)
 
 def validate_size_image(file_obj):
     """File size checking
