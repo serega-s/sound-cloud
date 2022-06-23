@@ -28,7 +28,7 @@ You must have Python installed, to check it
 python --version
 ```
 
-### Installing
+### Installing and running (without docker)
 
 A step by step series of examples that tell you how to get a development env running.
 
@@ -56,10 +56,46 @@ Creating a superuser
 python ./manage.py createsuperuser
 ```
 
+Collecting static
+
+```
+python ./manage.py createsuperuser
+```
+
 Running app
 
 ```
 python ./manage.py runserver
+```
+
+### Installing and running (with docker)
+
+A step by step series of examples that tell you how to get a development env running.
+
+Creating Docker image
+
+```
+docker-compose up --build
+```
+
+#### Note: at this part you have to open new terminal tab!
+
+To watch what Docker containers are running now
+
+```
+docker ps
+```
+
+Collecting static
+
+```
+docker exec -it sound_cloud_web python manage.py collectstatic
+```
+
+Creating a superuser
+
+```
+docker exec -it sound_cloud_web python manage.py createsuperuser
 ```
 
 ## ⛏️ Built Using <a name = "built_using"></a>
