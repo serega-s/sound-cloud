@@ -1,9 +1,10 @@
 import os
 
 from django.db.models import F
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, parsers, views, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, parsers, status, views, viewsets
 from src.base.classes import MixedSerializer, Pagination
 from src.base.services import delete_old_file
 
@@ -104,40 +105,72 @@ class PlayListView(viewsets.ModelViewSet):
 class TrackListView(generics.ListAPIView):
     """List of all tracks
     """
-    queryset = models.Track.objects.all()
+    queryset = models.Track.objects.filter(album__private=False, private=False)
     serializer_class = serializer.AuthorTrackSerializer
     pagination_class = Pagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['title', 'user__display_name',
+                        'album__name', 'genre__name']
 
 
 class AuthorTrackListView(generics.ListAPIView):
     """List of author tracks
     """
-    queryset = models.Track.objects.all()
+    queryset = models.Track.objects.filter(album__private=False, private=False)
     serializer_class = serializer.AuthorTrackSerializer
     pagination_class = Pagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['title', 'album__name', 'genre__name']
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
 
 
 class StreamingFileView(views.APIView):
+    """Streaming a file and increment count of plays
+    """
 
-    def set_play(self, track):
-        track.plays_count = F('plays_count') + 1
-        track.save()
+    def set_play(self):
+        self.track.plays_count = F('plays_count') + 1
+        self.track.save()
 
     def get(self, request, pk):
-        track = get_object_or_404(models.Track, id=pk)
+        self.track = get_object_or_404(models.Track, id=pk, private=False)
 
-        if os.path.exists(track.file.path):
-            self.set_play(track)
+        if os.path.exists(self.track.file.path):
+            self.set_play()
 
-            return FileResponse(open(track.file.path), 'rb', filename=track.file.name)
+            response = HttpResponse(
+                '', content_type='audio/mpeg', status=status.HTTP_206_PARTIAL_CONTENT)
+            response['Content-Disposition'] = f'attachment; filename={self.track.file.name}'
+            response['X-Accel-Redirect'] = f'/mp3/{self.track.file.name}'
+
+            return response
+        else:
+            return Http404
+
+
+class StreamingFileAuthorView(views.APIView):
+    """Playing author track
+    """
+    permission_classes = [IsAuthor]
+
+    def get(self, request, pk):
+        self.track = get_object_or_404(models.Track, id=pk, user=request.user)
+        if os.path.exists(self.track.file.path):
+            response = HttpResponse(
+                '', content_type='audio/mpeg', status=status.HTTP_206_PARTIAL_CONTENT)
+            response['X-Accel-Redirect'] = f'/mp3/{self.track.file.name}'
+
+            return response
         else:
             return Http404
 
 
 class DownloadTrackView(views.APIView):
+    """Possibility to download track and increment count of downloads
+    """
+
     def set_download(self):
         self.track.download = F('download') + 1
         self.track.save()
@@ -151,3 +184,27 @@ class DownloadTrackView(views.APIView):
             return FileResponse(open(self.track.file.path), 'rb', filename=self.track.file.name, as_attachment=True)
         else:
             return Http404
+
+
+class CommentAuthorView(viewsets.ModelViewSet):
+    """ CRUD for author comments
+    """
+    queryset = models.Comment.objects.all()
+    serializer_class = serializer.CommentAuthorSerializer
+    permission_classes = [IsAuthor]
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CommentView(viewsets.ModelViewSet):
+    """Comments for track
+    """
+    queryset = models.Comment.objects.all()
+    serializer_class = serializer.CommentSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(track_id=self.kwargs.get('id'))
